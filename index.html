@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PxCDY7c/Nt70X2Vx0a6PNFlR5xwDT9yzkgGQNF76S1g=' 'sha256-qNgFksX9CDx2FxO79HpxPtkfrkUTvynbZ/BbO3Y1gwQ=' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-U2ae6WENU99BG+MJ1UgqApL2oPBKjO7TedJblWOYQ44=' 'sha256-qNgFksX9CDx2FxO79HpxPtkfrkUTvynbZ/BbO3Y1gwQ=' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta charset="utf-8">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -339,7 +339,7 @@ textarea.rub{width:100%;min-height:38px;font-size:12px}
           <b id="gqTitle"></b>
           <span class="muted" id="gqInfo"></span>
           <span class="spacer"></span>
-          <span class="muted">答案は名簿順</span>
+          <span class="muted">答案は全員・名簿順</span>
           <label>教科 <select id="gradeSubject"></select></label>
 
           <label class="muted">大きさ <input type="range" id="tileSize" min="140" max="600" value="240"></label>
@@ -365,11 +365,7 @@ textarea.rub{width:100%;min-height:38px;font-size:12px}
     <div id="ckSide">
       <div id="ckSummary"></div>
       <div class="row" style="padding:8px 12px;border-bottom:1px solid var(--line)">
-        <label class="muted">表示 <select id="ckFilter">
-          <option value="all">全員</option>
-          <option value="todo">未確認の生徒</option>
-          <option value="issue">要確認（未採点・AIと違う）</option>
-        </select></label>
+        <span class="muted">全員を名簿順で表示</span>
       </div>
       <div id="ckList"></div>
     </div>
@@ -381,7 +377,6 @@ textarea.rub{width:100%;min-height:38px;font-size:12px}
           <button id="ckNext">次 ▶</button>
           <span class="muted" id="ckInfo"></span>
           <span class="spacer"></span>
-          <button id="ckNextIssue">次の要確認へ</button>
           <button id="ckOk" class="primary">✓ 確認済みにして次へ</button>
         </div>
         <p class="help" style="margin:6px 0 0">答案の解答欄をクリックすると、○・×・部分点を直せます（オレンジの点線＝未採点）。右の表に点数を直接入れることもできます。<kbd>Enter</kbd>で確認済みにして次へ、<kbd>←</kbd><kbd>→</kbd>で生徒を移動。</p>
@@ -518,6 +513,7 @@ textarea.rub{width:100%;min-height:38px;font-size:12px}
     <li>学校に個人情報・端末の利用ルールがある場合は、それに従ってください。</li>
   </ul>
   <h4>答案・成績データの扱い</h4><ul class="about"><li>採点・集計・PDF/Excel出力・保存は端末内で処理します。AIへの送信は、②のAIボタンで氏名などを隠し、送信内容を確認した場合だけ行います。</li><li>解答欄のAI自動設定では、先頭の生徒1人分の各ページで先生が氏名などを隠し、画像だけから作り直したPDFをAnthropicへ送信します。元PDFそのもの・名簿・採点結果・正答・採点基準は送りません。隠し忘れた情報は送信されるため、全ページを確認してください。</li><li>APIキーはこのブラウザーに保存します。共有端末では利用後にAI設定から削除してください。テストのバックアップにキーは含めません。AIによる採点はありません。</li><li>バックアップには個人情報が含まれます。学校が許可した保存場所で管理してください。</li></ul><p><a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー・学校での利用条件</a> ／ <a href="support.html" target="_blank" rel="noopener">不具合報告</a></p>
+  <h4>利用・二次配布について</h4><p>キリマルは無料で利用できます。ただし、zoemonlabの許可なく、キリマル本体のファイルを第三者へ配布・転載・再公開すること（二次配布）を禁止します。紹介・共有には公式配布ページのURLをご利用ください。この制限は、利用者が作成・出力した答案PDF・成績表などには適用しません。同梱のオープンソースソフトウェアには、各ソフトウェアのライセンスが適用されます。</p>
   <h4>使っているオープンソース</h4>
   <p class="muted" style="margin:0 0 4px">このアプリは次のソフトウェアを利用しています。いずれも無料で使え、配布が許されたライセンスです。</p>
   <table class="tests" style="font-size:13px">
@@ -3526,10 +3522,6 @@ function ckIssues(st) {
   }
   return { un, ai };
 }
-function ckVisible() {
-  const f = $('#ckFilter').value;
-  return S.students.filter((st) => f === 'all' ? true : f === 'todo' ? !S.checked?.[st.id] : (() => { const i = ckIssues(st); return i.un || i.ai; })());
-}
 function renderCheckSide() {
   const all = S.students, qs = questions();
   const done = all.filter((st) => S.checked?.[st.id]).length;
@@ -3541,7 +3533,7 @@ function renderCheckSide() {
     ${ai ? `<div class="warn">AIと判定が違う欄：${ai}</div>` : ''}
     ${noName ? `<div class="warn">氏名が未入力：${noName}人</div>` : ''}
     ${all.length && done === all.length && !un ? `<div class="good">すべて確認しました</div><button id="ckToSummary" class="primary">⑤ 集計・出力へ</button>` : ''}`;
-  const vis = ckVisible();
+  const vis = S.students; // 全員を登録名簿順で表示。採点状態で抽出しない。
   const cur = S.students[ck.idx];
   $('#ckList').innerHTML = vis.length ? vis.map((st) => {
     const i = ckIssues(st), t = studentTotals(st).total;
@@ -3634,14 +3626,6 @@ function ckGo(i) {
   hideMarkPop(); ck.idx = i; renderCheckSide(); renderCheckSheet();
   $('#ckList .st.sel')?.scrollIntoView({ block: 'nearest' });
 }
-function ckNextIssue() {
-  const n = S.students.length;
-  for (let k = 1; k <= n; k++) {
-    const i = (ck.idx + k) % n, st = S.students[i], is = ckIssues(st);
-    if (is.un || is.ai || !S.checked?.[st.id]) return ckGo(i);
-  }
-  toast('確認が必要な生徒はいません');
-}
 function ckOk() {
   const st = S.students[ck.idx]; if (!st) return;
   const is = ckIssues(st);
@@ -3654,8 +3638,6 @@ function ckOk() {
 $('#ckPrev').onclick = () => ckGo(ck.idx - 1);
 $('#ckNext').onclick = () => ckGo(ck.idx + 1);
 $('#ckOk').onclick = ckOk;
-$('#ckNextIssue').onclick = ckNextIssue;
-$('#ckFilter').onchange = () => renderCheckSide();
 $('#ckList').onclick = (e) => { const r = e.target.closest('.st'); if (r) ckGo(+r.dataset.i); };
 $('#ckSummary').onclick = (e) => { if (e.target.id === 'ckToSummary') showView('summary'); };
 $('#ckPages').addEventListener('pointerdown', (e) => {
