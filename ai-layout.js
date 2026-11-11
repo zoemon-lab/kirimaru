@@ -154,7 +154,7 @@ export function createAILayout({ getState, loadBitmap, onApply, toast }) {
   let feedbackTimer=null, phase='', startedAt=0;
   function stopFeedback(){if(feedbackTimer!==null)clearInterval(feedbackTimer);feedbackTimer=null;activity.hidden=true;$('#layoutSend').textContent='このPDFをAnthropicへ送って解析';}
   function tickFeedback(){const sec=Math.floor((Date.now()-startedAt)/1000);$('#layoutElapsed').textContent=`${phase} ／ 経過 ${sec}秒。最大120秒で中止します。画面を閉じずにお待ちください。`;$('#layoutSend').textContent=`解析中… ${sec}秒`;}
-  function startFeedback(){stopFeedback();startedAt=Date.now();phase='送信前の安全設定を確認中';activity.hidden=false;tickFeedback();feedbackTimer=setInterval(tickFeedback,1000);activity.scrollIntoView({block:'nearest'});}
+  function startFeedback(){stopFeedback();startedAt=Date.now();phase='送信前の安全設定を確認中';activity.hidden=false;tickFeedback();feedbackTimer=setInterval(tickFeedback,1000);dlg.scrollTop=0;}
   $('#layoutAbort').onclick=()=>controller?.abort();
   function explain(message){launchNotice.hidden=false;launchNotice.textContent=message;toast(message,10000);launchNotice.scrollIntoView({block:'nearest'});}
 
@@ -241,7 +241,7 @@ export function createAILayout({ getState, loadBitmap, onApply, toast }) {
   }
   function status(s) {
     $("#layoutStatus").textContent = s;
-    if(dlg.open)$("#layoutStatus").scrollIntoView({block:"nearest"});
+    if(dlg.open)dlg.scrollTop=0;
   }
   function stage(s) {
     for (const n of document.querySelectorAll("[data-layout-stage]"))
